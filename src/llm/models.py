@@ -12,6 +12,8 @@ class ModelProvider(str, Enum):
     OPENAI = "OpenAI"
     GROQ = "Groq"
     ANTHROPIC = "Anthropic"
+    DEEPSEEK = "DeepSeek"
+    HUNYUAN = "HunYuan"
 
 
 class LLMModel(BaseModel):
@@ -76,6 +78,16 @@ AVAILABLE_MODELS = [
         model_name="o3-mini",
         provider=ModelProvider.OPENAI
     ),
+    LLMModel(
+        display_name="[deepseek] deepseek-r1",
+        model_name="ds-r1",
+        provider=ModelProvider.DEEPSEEK
+    ),
+    LLMModel(
+        display_name="[hunyuan] deepseek-r1",
+        model_name="hunyuan-deepseek-r1",
+        provider=ModelProvider.HUNYUAN
+    ),
 ]
 
 # Create LLM_ORDER in the format expected by the UI
@@ -107,3 +119,26 @@ def get_model(model_name: str, model_provider: ModelProvider) -> ChatOpenAI | Ch
             print(f"API Key Error: Please make sure ANTHROPIC_API_KEY is set in your .env file.")
             raise ValueError("Anthropic API key not found.  Please make sure ANTHROPIC_API_KEY is set in your .env file.")
         return ChatAnthropic(model=model_name, api_key=api_key)
+    elif model_provider == ModelProvider.DEEPSEEK:
+        api_key = os.getenv("DEEPSEEK_API_KEY")
+        if not api_key:
+            print(f"API Key Error: Please make sure DEEPSEEK_API_KEY is set in your .env file.")
+            raise ValueError("Anthropic API key not found.  Please make sure DEEPSEEK_API_KEY is set in your .env file.")
+        return ChatOpenAI(
+                model='deepseek-reasoner', 
+                openai_api_key=api_key, 
+                openai_api_base='https://api.deepseek.com',
+                max_tokens=1024,
+            )
+    elif model_provider == ModelProvider.HUNYUAN:
+        api_key = os.getenv("HUNYUAN_API_KEY")
+        if not api_key:
+            print(f"API Key Error: Please make sure HUNYUAN_API_KEY is set in your .env file.")
+            raise ValueError("Anthropic API key not found.  Please make sure HUNYUAN_API_KEY is set in your .env file.")
+        return ChatOpenAI(
+                model='deepseek-r1', 
+                openai_api_key=api_key, 
+                # openai_api_base='https://api.hunyuan.cloud.tencent.com/v1',
+                openai_api_base='https://api.lkeap.cloud.tencent.com/v1',
+                # max_tokens=1024,
+            )
